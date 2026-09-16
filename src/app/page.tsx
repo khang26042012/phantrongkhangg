@@ -1,96 +1,113 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import { personal, skills, projects, experience, stats } from "@/data/mockData";
+import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+import { personal, skills, projects, experience, stats } from '@/data/mockData';
+import { useAppStore } from '@/store/useAppStore';
 
-const GalaxyCanvas = dynamic(() => import("@/components/GalaxyCanvas"), { ssr: false });
+gsap.registerPlugin(ScrollTrigger);
+
+const GalaxyScene = dynamic(() => import('@/three/GalaxyScene').then(m => m.GalaxyScene), { ssr: false });
+const Loader = dynamic(() => import('@/components/Loader').then(m => m.Loader), { ssr: false });
 
 export default function Home() {
-  const [loaded, setLoaded] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const storeSetScroll = useAppStore((s) => s.setScrollProgress);
 
   useEffect(() => {
-    // Simulate loading screen
-    const t = setTimeout(() => setLoaded(true), 2000);
-    return () => clearTimeout(t);
-  }, []);
+    if (typeof window === 'undefined') return;
+    let lenis: Lenis;
+    let cleanupFns: (() => void)[] = [];
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.5,
+    });
 
-    // Lenis smooth scroll
-    const lenis = new (window as any).Lenis({ duration: 1.2, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
-    function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf); }
-    requestAnimationFrame(raf);
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
 
-    // Scroll progress
     const onScroll = () => {
       const h = document.documentElement;
       const max = h.scrollHeight - h.clientHeight;
-      setScrollProgress(max > 0 ? (h.scrollTop / max) * 100 : 0);
+      const progress = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      setScrollProgress(progress);
+      storeSetScroll(progress);
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    cleanupFns.push(() => window.removeEventListener('scroll', onScroll));
 
-    // IntersectionObserver for reveal
     const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
-    }, { threshold: 0.1 });
-    document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.reveal').forEach((el) => obs.observe(el));
+    cleanupFns.push(() => obs.disconnect());
 
-    // Letter animation
-    const nameEl = document.getElementById("hero-name");
+    const nameEl = document.getElementById('hero-name');
     if (nameEl) {
-      nameEl.querySelectorAll(".letter").forEach((el, i) => {
-        setTimeout(() => el.classList.add("animate"), 200 + i * 80);
+      nameEl.querySelectorAll('.letter').forEach((el: Element, i: number) => {
+        setTimeout(() => el.classList.add('animate'), 400 + i * 70);
       });
     }
 
-    // Skill bars
-    document.querySelectorAll(".skill-bar-fill").forEach((el) => {
-      el.style.width = "0%";
-    });
-    setTimeout(() => {
-      document.querySelectorAll(".skill-bar-fill").forEach((el) => {
-        el.style.width = el.getAttribute("data-level") + "%";
+    const animateSkillBars = () => {
+      document.querySelectorAll('.skill-bar-fill').forEach((el) => { el.style.width = '0%'; });
+      setTimeout(() => {
+        document.querySelectorAll('.skill-bar-fill').forEach((el) => {
+          el.style.width = el.getAttribute('data-level') + '%';
+        });
+      }, 300);
+    };
+    const skillObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateSkillBars(); skillObs.unobserve(e.target); }
       });
-    }, 500);
+    }, { threshold: 0.3 });
+    const skillsSection = document.getElementById('skills');
+    if (skillsSection) skillObs.observe(skillsSection);
+    cleanupFns.push(() => skillObs.disconnect());
+
+    const tl = gsap.timeline({ delay: 0.5 });
+    tl.fromTo('.hero-tagline', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' })
+      .fromTo('.hero-title', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, '-=0.4')
+      .fromTo('.hero-scroll-hint', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.3');
+    cleanupFns.push(() => tl.kill());
 
     return () => {
-      lenis.destroy();
-      window.removeEventListener("scroll", onScroll);
-      obs.disconnect();
+      cleanupFns.forEach((fn) => fn());
+      if (lenis) lenis.destroy();
     };
-  }, []);
+  }, [storeSetScroll]);
 
   return (
     <>
-      <div className="loader" style={{ opacity: loaded ? 0 : 1, visibility: loaded ? "hidden" : "visible" }}>
-        <div className="loader-text">Đang xuyên qua hư không...</div>
-        <div className="loader-bar">
-          <div className="loader-bar-fill" style={{ width: loaded ? "100%" : "60%" }} />
-        </div>
-      </div>
-
-      <GalaxyCanvas />
-      <div className="vignette" />
+      <Loader />
+      <GalaxyScene />
       <div className="grain" />
-
-      <div className="scroll-progress" style={{ width: scrollProgress + "%" }} />
+      <div className="scroll-progress" style={{ width: scrollProgress + '%' }} />
 
       <a href="#" className="logo">N<span>·</span>A</a>
-      <nav>
+      <nav className="nav">
         <a href="#about" className="nav-link">About</a>
         <a href="#skills" className="nav-link">Skills</a>
         <a href="#projects" className="nav-link">Projects</a>
         <a href="#contact" className="nav-link">Contact</a>
       </nav>
 
-      <section className="hero">
+      <section className="hero" id="hero">
         <p className="hero-tagline">{personal.tagline}</p>
         <h1 id="hero-name" className="hero-name font-display">
-          {personal.name.split("").map((c, i) => (
-            <span key={i} className="letter">{c === " " ? "\u00A0" : c}</span>
+          {personal.name.split('').map((c, i) => (
+            <span key={i} className="letter">{c === ' ' ? ' ' : c}</span>
           ))}
         </h1>
         <p className="hero-title">{personal.title}</p>
@@ -107,6 +124,16 @@ export default function Home() {
           <div className="about-text reveal">
             <p>{personal.bio}</p>
             <p>{personal.bio2}</p>
+            <div className="about-meta">
+              <div>
+                <span className="about-meta-label">Location</span>
+                <span className="about-meta-value">{personal.location}</span>
+              </div>
+              <div>
+                <span className="about-meta-label">Status</span>
+                <span className="about-meta-value">{personal.availability}</span>
+              </div>
+            </div>
           </div>
           <div className="about-stats reveal">
             {stats.map((s, i) => (
@@ -120,15 +147,15 @@ export default function Home() {
       </section>
 
       <section id="skills">
-        <p className="section-label reveal">Kỹ năng</p>
-        <h2 className="section-title font-display reveal">Công cụ & Chuyên môn</h2>
+        <p className="section-label reveal">Kỹ nạng</p>
+        <h2 className="section-title font-display reveal">Công cụ &amp; Chuyên môn</h2>
         <div className="skills-grid">
           {skills.map((s, i) => (
             <div key={i} className="skill reveal">
               <div className="skill-name">{s.name}</div>
               <div className="skill-category">{s.category}</div>
               <div className="skill-bar">
-                <div className="skill-bar-fill" data-level={s.level} style={{ width: "0%" }} />
+                <div className="skill-bar-fill" data-level={s.level} style={{ width: '0%' }} />
               </div>
               <div className="skill-level">{s.level}%</div>
             </div>
@@ -137,11 +164,11 @@ export default function Home() {
       </section>
 
       <section id="projects">
-        <p className="section-label reveal">Dự án</p>
+        <p className="section-label reveal">Dự ản</p>
         <h2 className="section-title font-display reveal">Những vì sao đã tạo</h2>
         <div className="projects-grid">
           {projects.map((p, i) => (
-            <div key={i} className="project reveal">
+            <div key={i} className={'project reveal project-' + p.accent}>
               <div className="project-year">{p.year}</div>
               <h3 className="project-title">{p.title}</h3>
               <div className="project-client">{p.client}</div>
@@ -149,6 +176,7 @@ export default function Home() {
               <div className="project-tags">
                 {p.tags.map((t, j) => <span key={j} className="project-tag">{t}</span>)}
               </div>
+              <a href={p.link} className="project-link">View project →</a>
             </div>
           ))}
         </div>
@@ -156,7 +184,7 @@ export default function Home() {
 
       <section id="experience">
         <p className="section-label reveal">Kinh nghiệm</p>
-        <h2 className="section-title font-display reveal">Đường đi đã trải</h2>
+        <h2 className="section-title font-display reveal">Đưống đi đã trải</h2>
         <div className="experience-list">
           {experience.map((e, i) => (
             <div key={i} className="experience-item reveal">
@@ -171,13 +199,25 @@ export default function Home() {
 
       <section id="contact" className="contact">
         <p className="section-label reveal">Liên hệ</p>
-        <h2 className="section-title font-display reveal">Cùng tạo ra điều gì đó huyền bí</h2>
-        <a href={"mailto:" + personal.email} className="contact-email reveal">{personal.email}</a>
+        <h2 className="section-title font-display reveal">Cùng tạo ra điều gì đó huyện bí</h2>
+        <a href={'mailto:' + personal.email} className="contact-email reveal">{personal.email}</a>
         <div className="contact-socials reveal">
-          <a href="#" className="social-link">{personal.socials.github}</a>
-          <a href="#" className="social-link">{personal.socials.twitter}</a>
-          <a href="#" className="social-link">{personal.socials.linkedin}</a>
-          <a href="#" className="social-link">{personal.socials.portfolio}</a>
+          <a href={'https://' + personal.socials.github} target="_blank" rel="noopener noreferrer" className="social-link">
+            <span className="social-icon">GH</span>
+            {personal.socials.github}
+          </a>
+          <a href={'https://' + personal.socials.twitter} target="_blank" rel="noopener noreferrer" className="social-link">
+            <span className="social-icon">X</span>
+            {personal.socials.twitter}
+          </a>
+          <a href={'https://' + personal.socials.linkedin} target="_blank" rel="noopener noreferrer" className="social-link">
+            <span className="social-icon">IN</span>
+            {personal.socials.linkedin}
+          </a>
+          <a href={'https://' + personal.socials.portfolio} target="_blank" rel="noopener noreferrer" className="social-link">
+            <span className="social-icon">PT</span>
+            {personal.socials.portfolio}
+          </a>
         </div>
       </section>
 
@@ -187,4 +227,3 @@ export default function Home() {
     </>
   );
 }
-

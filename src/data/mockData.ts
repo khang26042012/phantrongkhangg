@@ -1,24 +1,31 @@
-// Mock data cho portfolio "Galaxy Mysterious"
-// Cảm giác huyền bí, vũ trụ, sáng tạo
+// Mock data cho portfolio "Galaxy Huyền Bí"
+// Cảm giác huyền bí, vũ trụ, sáng tạo — monochrome + một điểm nhấn vàng nhạt
 
 export const personal = {
   name: "Ngọc Anh",
   title: "Creative Developer & 3D Artist",
   tagline: "Từ những vì sao đến dòng code",
-  bio: "Tôi bắt đầu như một ánh sao lạc lõng — lang thang giữa các hệ thiên hà số, thu thập mọi tinh túy về ánh sáng, vật liệu và chuyển động. Mỗi dự án là một hành trình khám phá, nơi code gặp nghệ thuật và cả hai cùng tiến hóa. Tôi tin vào sức mạnh của sự tĩnh lặng — của một khoảng đen sâu thẳm chứa vô vàn hạt sáng.",
-  bio2: "Làm việc độc lập từ 2022, tôi đã triển khai hơn 30 trải nghiệm web 3D for các thương hiệu và nghệ sĩ quốc tế. Công cụ chính: Three.js, WebGL, GLSL, Blender. Phong cách: monochrome, sâu thẳm, có điểm nhấn vàng.",
+  bio: "Tôi bắt đầu như một ánh sao lạc lõng — lang thang giữa các hệ thiên hà số, thu thập mọi tinh túy về ánh sáng, vật liệu và chuyển động. Mỗi dự án là một hành trình khám phá, nơi code gặp nghệ thuật và cả hai cùng tiến hóa.",
+  bio2: "Tôi tin vào sức mạnh của sự tĩnh lặng — của một khoảng đen sâu thẳm chứa vô vàn hạt sáng. Làm việc độc lập từ 2022, tôi đã triển khai hơn 30 trải nghiệm web 3D cho các thương hiệu và nghệ sĩ quốc tế. Công cụ chính: Three.js, WebGL, GLSL, Blender. Phong cách: monochrome, sâu thẳm, có một điểm nhấn vàng.",
   email: "ngocanh@galaxy.dev",
   location: "Hà Nội — làm việc toàn cầu",
   availability: "Đang nhận dự án Q4 2026",
   socials: {
     github: "github.com/ngocanh",
-    twitter: "twitter.com/ngocanh_dev",
+    twitter: "x.com/ngocanh_dev",
     linkedin: "linkedin.com/in/ngocanh",
     portfolio: "ngocanh.galaxy",
   },
 };
 
-export const skills = [
+export type Skill = {
+  name: string;
+  level: number;
+  icon: string;
+  category: "3D" | "Motion" | "Web" | "Future";
+};
+
+export const skills: Skill[] = [
   { name: "Three.js", level: 95, icon: "orbit", category: "3D" },
   { name: "React Three Fiber", level: 90, icon: "react", category: "3D" },
   { name: "WebGL / GLSL", level: 88, icon: "shader", category: "3D" },
@@ -31,7 +38,18 @@ export const skills = [
   { name: "Post-processing", level: 87, icon: "glow", category: "3D" },
 ];
 
-export const projects = [
+export type Project = {
+  id: string;
+  title: string;
+  year: string;
+  description: string;
+  tags: string[];
+  client: string;
+  link: string;
+  accent: "gold" | "mono";
+};
+
+export const projects: Project[] = [
   {
     id: "nebula-archive",
     title: "Nebula Archive",
@@ -40,7 +58,7 @@ export const projects = [
     tags: ["Three.js", "WebGL", "GLSL", "Next.js"],
     client: "Studio Aurora",
     link: "#",
-    accent: "gold" as const,
+    accent: "gold",
   },
   {
     id: "silence",
@@ -50,7 +68,7 @@ export const projects = [
     tags: ["React Three Fiber", "Web Audio", "GSAP"],
     client: "Solo artist",
     link: "#",
-    accent: "mono" as const,
+    accent: "mono",
   },
   {
     id: "black-market",
@@ -60,7 +78,7 @@ export const projects = [
     tags: ["Next.js", "Tailwind", "GSAP", "Lenis"],
     client: "B.M. Studio",
     link: "#",
-    accent: "mono" as const,
+    accent: "mono",
   },
   {
     id: "constellation",
@@ -70,7 +88,7 @@ export const projects = [
     tags: ["Three.js", "ScrollTrigger", "WebGL"],
     client: "Personal",
     link: "#",
-    accent: "gold" as const,
+    accent: "gold",
   },
   {
     id: "void-catalog",
@@ -80,11 +98,18 @@ export const projects = [
     tags: ["Three.js", "WebGL", "Procedural"],
     client: "Void Labs",
     link: "#",
-    accent: "mono" as const,
+    accent: "mono",
   },
 ];
 
-export const experience = [
+export type Experience = {
+  period: string;
+  role: string;
+  company: string;
+  description: string;
+};
+
+export const experience: Experience[] = [
   {
     period: "2026 — Hiện tại",
     role: "Independent Creative Developer",
@@ -111,7 +136,9 @@ export const experience = [
   },
 ];
 
-export const stats = [
+export type Stat = { value: string; label: string };
+
+export const stats: Stat[] = [
   { value: "30+", label: "Dự án 3D web" },
   { value: "12", label: "Giải thưởng quốc tế" },
   { value: "5yr", label: "Kinh nghiệm" },
