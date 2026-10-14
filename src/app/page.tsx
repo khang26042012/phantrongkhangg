@@ -1,262 +1,96 @@
-"use client";
-
-import { useEffect, useState, useRef, useCallback } from "react";
-
 export default function Home() {
-  const [time, setTime] = useState<string>("");
-  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({
-    x: 50,
-    y: 50,
-  });
-
-  const rafRef = useRef<number | null>(null);
-
-  // Synchronize live clock (Saigon / UTC+7) with clean interval cleanup
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const formatted = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Asia/Ho_Chi_Minh",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      }).format(now);
-      setTime(formatted);
-    };
-
-    updateTime();
-    const timer = setInterval(updateTime, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Optimized ambient spotlight tracking via requestAnimationFrame (Vercel Best Practices)
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      const { clientX, clientY, currentTarget } = e;
-      const rect = currentTarget.getBoundingClientRect();
-
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
-      rafRef.current = requestAnimationFrame(() => {
-        const x = ((clientX - rect.left) / rect.width) * 100;
-        const y = ((clientY - rect.top) / rect.height) * 100;
-        setMousePos({ x, y });
-      });
-    },
-    []
-  );
-
-  useEffect(() => {
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
   return (
-    <div
-      onMouseMove={handleMouseMove}
-      className="relative flex h-dvh max-h-dvh w-full flex-col justify-between overflow-hidden bg-[#070709] p-5 text-neutral-200 select-none sm:p-8 md:p-10 lg:p-12"
-    >
-      {/* Background ambient spotlight */}
-      <div
-        className="pointer-events-none absolute inset-0 transition-opacity duration-1000"
-        style={{
-          background: `radial-gradient(circle 650px at ${mousePos.x}% ${mousePos.y}%, rgba(255, 255, 255, 0.045), transparent 70%)`,
-        }}
-      />
-
-      {/* Background architectural grid */}
-      <div className="bg-grid-editorial pointer-events-none absolute inset-0 opacity-25" />
-
-      {/* Architectural Corner Crosshairs */}
-      <span className="pointer-events-none absolute top-3 left-3 font-mono text-[10px] text-neutral-600 sm:top-5 sm:left-5">
-        +
-      </span>
-      <span className="pointer-events-none absolute top-3 right-3 font-mono text-[10px] text-neutral-600 sm:top-5 sm:right-5">
-        +
-      </span>
-      <span className="pointer-events-none absolute bottom-3 left-3 font-mono text-[10px] text-neutral-600 sm:bottom-5 sm:left-5">
-        +
-      </span>
-      <span className="pointer-events-none absolute bottom-3 right-3 font-mono text-[10px] text-neutral-600 sm:bottom-5 sm:right-5">
-        +
-      </span>
+    <div className="relative flex h-dvh max-h-dvh w-screen flex-col justify-between overflow-hidden bg-[#080808] p-6 text-zinc-200 select-none sm:p-10 md:p-14 lg:p-16">
+      {/* Subtle fine film grain layer */}
+      <div className="bg-film-grain pointer-events-none absolute inset-0 z-0" />
 
       {/* ======================================================== */}
-      {/* 1. TOP EDITORIAL BAR (Header Meta)                       */}
+      {/* 1. TOP EDITORIAL BAR                                     */}
       {/* ======================================================== */}
       <header
-        className="animate-editorial-reveal relative z-10 flex w-full items-center justify-between border-b border-neutral-800/80 pb-3 sm:pb-4"
-        style={{ animationDelay: "100ms" }}
+        className="animate-fade-in relative z-10 flex w-full items-center justify-between"
+        style={{ animationDelay: "150ms" }}
       >
-        {/* Left: Edition & Status */}
-        <div className="flex items-center gap-3 sm:gap-5">
-          <span className="font-mono text-[10px] tracking-[0.22em] text-neutral-400 uppercase sm:text-xs">
-            [ ED. 2026 // INTRO ]
+        <span className="text-[11px] font-medium tracking-[0.22em] text-zinc-400 uppercase">
+          CREATIVE DEVELOPER &amp; SYSTEMS ARCHITECT
+        </span>
+
+        <a
+          href="mailto:trongkhabgphan@gmail.com"
+          className="group relative inline-flex items-center gap-1 text-[11px] font-medium tracking-[0.22em] text-zinc-400 uppercase transition-colors duration-300 hover:text-white"
+        >
+          <span>CONTACT</span>
+          <span className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+            ↗
           </span>
-          <div className="hidden items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 sm:inline-flex">
-            <span className="animate-status-pulse h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="font-mono text-[9px] font-medium tracking-widest text-emerald-300 uppercase">
-              ONLINE
-            </span>
-          </div>
-        </div>
-
-        {/* Center: Discipline Tagline */}
-        <div className="hidden text-center md:block">
-          <p className="font-mono text-[10px] tracking-[0.28em] text-neutral-400 uppercase lg:text-[11px]">
-            SYSTEMS ARCHITECTURE &bull; CREATIVE TECHNOLOGY
-          </p>
-        </div>
-
-        {/* Right: Live Clock & Action */}
-        <div className="flex items-center gap-3 sm:gap-5">
-          <div className="font-mono text-[10px] tracking-wider text-neutral-400 sm:text-xs">
-            <span className="text-neutral-500">ICT </span>
-            <span className="font-semibold text-neutral-200">
-              {time || "12:00:00"}
-            </span>
-          </div>
-          <a
-            href="mailto:trongkhabgphan@gmail.com"
-            className="group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full border border-neutral-700/80 bg-neutral-900/60 px-3 py-1 font-mono text-[10px] tracking-wider text-neutral-300 uppercase transition-all duration-300 hover:border-neutral-200 hover:bg-neutral-100 hover:text-neutral-950 sm:px-3.5 sm:py-1.5 sm:text-xs"
-          >
-            <span>CONTACT</span>
-            <span className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-              ↗
-            </span>
-          </a>
-        </div>
+          <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-white transition-all duration-300 group-hover:w-full" />
+        </a>
       </header>
 
       {/* ======================================================== */}
-      {/* 2. CENTRAL EDITORIAL PLANE (Oversized Brand Typography)  */}
+      {/* 2. OVERSIZED BRAND TYPOGRAPHY                            */}
       {/* ======================================================== */}
-      <main className="relative z-10 flex flex-1 flex-col justify-center py-2 sm:py-4">
-        {/* Sub-label above brand name */}
-        <div
-          className="animate-editorial-reveal mb-2 flex items-center justify-between sm:mb-4"
-          style={{ animationDelay: "200ms" }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="h-[1px] w-6 bg-neutral-600 sm:w-10" />
-            <span className="font-mono text-[10px] tracking-[0.3em] text-neutral-400 uppercase sm:text-xs">
-              PORTFOLIO ARCHIVE
-            </span>
-          </div>
-          <span className="font-mono text-[10px] tracking-widest text-neutral-500 uppercase sm:text-xs">
-            01 / 01
-          </span>
-        </div>
-
-        {/* Oversized Brand Typography */}
-        <div
-          className="animate-editorial-reveal flex flex-col"
-          style={{ animationDelay: "300ms" }}
-        >
-          <h1 className="flex flex-col font-extrabold tracking-[-0.05em] uppercase text-white">
-            <span className="text-[clamp(2.75rem,11.5vw,10.5rem)] leading-[0.88] select-all">
+      <main className="relative z-10 flex flex-1 flex-col justify-center">
+        <h1 className="flex flex-col text-[clamp(3.5rem,10.5vw,11.5rem)] font-bold tracking-[-0.04em] text-white uppercase select-all">
+          <span className="block overflow-hidden py-1">
+            <span
+              className="animate-mask-up block leading-[0.86]"
+              style={{ animationDelay: "250ms" }}
+            >
               PHAN
             </span>
-            <span className="text-[clamp(2.75rem,11.5vw,10.5rem)] leading-[0.88] text-neutral-300 select-all transition-colors duration-500 hover:text-white">
+          </span>
+          <span className="block overflow-hidden py-1">
+            <span
+              className="animate-mask-up block leading-[0.86] text-zinc-100"
+              style={{ animationDelay: "400ms" }}
+            >
               TRỌNG KHANG
             </span>
-          </h1>
-        </div>
-
-        {/* Editorial Sub-grid: Role, Coordinates, Manifesto */}
-        <div
-          className="animate-editorial-reveal mt-4 grid grid-cols-1 gap-4 border-t border-neutral-800/80 pt-4 sm:mt-6 sm:grid-cols-12 sm:gap-6 sm:pt-6"
-          style={{ animationDelay: "450ms" }}
-        >
-          {/* Column 1: Primary Titles */}
-          <div className="flex flex-col gap-1 sm:col-span-5 md:col-span-4">
-            <span className="font-mono text-[9px] tracking-[0.25em] text-neutral-500 uppercase sm:text-[10px]">
-              CORE DISCIPLINES
-            </span>
-            <p className="text-xs font-medium tracking-tight text-neutral-200 sm:text-sm md:text-base">
-              Creative Developer & Systems Architect
-            </p>
-            <p className="font-mono text-[10px] tracking-wide text-neutral-400 sm:text-xs">
-              Distributed Infrastructure & High-Performance Web
-            </p>
-          </div>
-
-          {/* Column 2: Editorial Statement / Ethos */}
-          <div className="flex flex-col justify-center sm:col-span-7 md:col-span-8">
-            <span className="font-mono text-[9px] tracking-[0.25em] text-neutral-500 uppercase sm:text-[10px]">
-              DESIGN ETHOS
-            </span>
-            <p className="text-xs leading-relaxed text-neutral-400 sm:text-sm md:max-w-xl">
-              Sculpting resilient cloud architectures, real-time distributed
-              systems, and visceral 3D digital artifacts at the exact
-              intersection of engineering rigor and minimalist aesthetics.
-            </p>
-          </div>
-        </div>
+          </span>
+        </h1>
       </main>
 
       {/* ======================================================== */}
-      {/* 3. BOTTOM EDITORIAL BAR (Zero-Scroll Anchor Meta)        */}
+      {/* 3. BOTTOM EDITORIAL ROW                                  */}
       {/* ======================================================== */}
       <footer
-        className="animate-editorial-reveal relative z-10 flex w-full items-center justify-between border-t border-neutral-800/80 pt-3 sm:pt-4"
-        style={{ animationDelay: "600ms" }}
+        className="animate-fade-in relative z-10 flex w-full flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
+        style={{ animationDelay: "550ms" }}
       >
-        {/* Left: Origin & Coordinates */}
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] text-neutral-500 uppercase sm:text-xs">
-            ORIGIN:
-          </span>
-          <span className="font-mono text-[10px] tracking-wider text-neutral-300 uppercase sm:text-xs">
-            10°15&apos;N 105°58&apos;E &bull; VN
-          </span>
-        </div>
+        {/* Editorial Short Ethos Statement */}
+        <p className="max-w-md text-[13px] font-light leading-relaxed text-zinc-400">
+          Crafting high-throughput distributed systems and tactile digital
+          experiences at the intersection of architectural discipline and
+          minimalist aesthetics.
+        </p>
 
-        {/* Center: Stack Badges (Hidden on mobile, visible on sm+) */}
-        <div className="hidden items-center gap-2 font-mono text-[10px] tracking-wider text-neutral-400 uppercase sm:flex">
-          <span className="rounded bg-neutral-900 px-2 py-0.5 text-neutral-300">
-            NEXT.JS
-          </span>
-          <span className="text-neutral-600">&bull;</span>
-          <span className="rounded bg-neutral-900 px-2 py-0.5 text-neutral-300">
-            TYPESCRIPT
-          </span>
-          <span className="text-neutral-600">&bull;</span>
-          <span className="rounded bg-neutral-900 px-2 py-0.5 text-neutral-300">
-            JAVA
-          </span>
-          <span className="text-neutral-600">&bull;</span>
-          <span className="rounded bg-neutral-900 px-2 py-0.5 text-neutral-300">
-            PYTHON
-          </span>
-        </div>
-
-        {/* Right: External Outlinks */}
-        <div className="flex items-center gap-4">
+        {/* Minimal Text Outlinks */}
+        <div className="flex items-center gap-7 sm:gap-9">
           <a
             href="https://github.com/khang26042012"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-1 font-mono text-[10px] tracking-wider text-neutral-400 uppercase transition-colors hover:text-white sm:text-xs"
+            className="group relative inline-flex items-center gap-1 text-[11px] font-medium tracking-[0.2em] text-zinc-400 uppercase transition-colors duration-300 hover:text-white"
           >
             <span>GITHUB</span>
-            <span className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+            <span className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
               ↗
             </span>
+            <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-white transition-all duration-300 group-hover:w-full" />
           </a>
-          <span className="text-neutral-700">/</span>
+
           <a
             href="https://nexorax.cloud"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-1 font-mono text-[10px] tracking-wider text-neutral-400 uppercase transition-colors hover:text-white sm:text-xs"
+            className="group relative inline-flex items-center gap-1 text-[11px] font-medium tracking-[0.2em] text-zinc-400 uppercase transition-colors duration-300 hover:text-white"
           >
             <span>CLOUD</span>
-            <span className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+            <span className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
               ↗
             </span>
+            <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-white transition-all duration-300 group-hover:w-full" />
           </a>
         </div>
       </footer>

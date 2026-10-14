@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#08080a",
+  themeColor: "#080808",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -38,7 +38,7 @@ export default function RootLayout({
       lang="vi"
       className={`${geistSans.variable} ${geistMono.variable} h-full overflow-hidden antialiased`}
     >
-      <body className="h-full w-full overflow-hidden bg-[#08080a] text-[#f4f4f5]">
+      <body className="h-full w-full overflow-hidden bg-[#080808] text-[#fafafa]">
         {children}
       </body>
     </html>
