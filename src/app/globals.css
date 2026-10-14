@@ -18,15 +18,24 @@
 
 html,
 body {
-  height: 100dvh;
-  max-height: 100dvh;
+  min-height: 100%;
   width: 100%;
-  overflow: hidden;
   background-color: #080808;
   color: #fafafa;
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide default browser scrollbar for ultra-clean editorial feel */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 /* Subtle tactile film grain texture (frontend-design standard) */

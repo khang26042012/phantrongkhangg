@@ -36,9 +36,9 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${geistSans.variable} ${geistMono.variable} h-full overflow-hidden antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} min-h-full antialiased`}
     >
-      <body className="h-full w-full overflow-hidden bg-[#080808] text-[#fafafa]">
+      <body className="min-h-full w-full bg-[#080808] text-[#fafafa] selection:bg-white selection:text-black">
         {children}
       </body>
     </html>
